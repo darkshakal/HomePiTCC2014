@@ -1,0 +1,15 @@
+#!/bin/bash
+
+#script para leitura do sensor de temperatura
+#ultima modificacao: 01-06-2014
+
+mysqlusername="root"
+mysqlpassword="mestre"
+
+DEFAULT_MYSQL="mysql -B --disable-column-names --user=$mysqlusername --password=$mysqlpassword gpio -e "
+
+WORK_DIR="/sys/bus/w1/devices/"
+READ_TEMP=`cat ${WORK_DIR}/28-000005b6647e/w1_slave | grep -i 't=' | cut -d= -f2`
+
+${DEFAULT_MYSQL}"UPDATE temperature SET temp_read = ${READ_TEMP};";
+

@@ -1,0 +1,388 @@
+#!/bin/bash
+# File: GPIOSERVER
+# Description: System core
+# Last update: 01-06-2014
+# Author: Vagner Fritsch
+
+mysqlusername="root"
+mysqlpassword="mestre"
+
+SCRIPTS_DIR="/usr/bin/"
+DEFAULT_MYSQL="mysql -B --disable-column-names --user=$mysqlusername --password=$mysqlpassword gpio -e "
+CLEAR_ALARM="0"
+
+# refresh time
+waitTime="1"
+
+
+#Start the main Loop
+while :
+do
+TIME_DATA=`date +%Y%m%d`
+TIME_HORA=`date +%H%M`
+TIME_H=`date +%H`
+TIME_M=`date +%M`
+
+
+	#read the temperature
+	TEMPERATURE=$(${DEFAULT_MYSQL}"SELECT temp_read FROM temperature;");
+
+	#Read if Alarm is activated
+	SET_ALARM=$(${DEFAULT_MYSQL}"SELECT alarm_set FROM alarm;");
+
+	# if alarm is activated, test the switch
+	if [ ${SET_ALARM} == "1" ]
+	then
+		CLEAR_ALARM=$(${DEFAULT_MYSQL}"SELECT alarm_clear FROM alarm;");
+		if [ ${CLEAR_ALARM} == "0" ]
+			then
+			DIP_SWITCH=`${SCRIPTS_DIR}GPIOPIN 22`
+				if [ ${DIP_SWITCH} == "0" ]
+				then
+					${SCRIPTS_DIR}GPIOSET 11
+					${DEFAULT_MYSQL}"UPDATE alarm SET alarm_flag = 1;";
+					${DEFAULT_MYSQL}"UPDATE pinstatus SET pinstatus = 1 WHERE pin_num='11';";
+					${DEFAULT_MYSQL}"INSERT INTO logs (log_event_id,log_data,log_hora) VALUES  (23,${TIME_DATA},${TIME_HORA});";
+					${SCRIPTS_DIR}SENDMAIL
+				#else
+					#${SCRIPTS_DIR}GPIOCLR 11
+				fi
+		else
+			${DEFAULT_MYSQL}"UPDATE alarm SET alarm_clear = 0;";
+			#${DEFAULT_MYSQL}"UPDATE alarm SET alarm_set = 0;";
+			${SCRIPTS_DIR}GPIOCLR 11
+			${DEFAULT_MYSQL}"UPDATE pinstatus SET pinstatus = 0 WHERE pin_num='11';";
+		fi
+	else
+		${DEFAULT_MYSQL}"UPDATE alarm SET alarm_clear = 0;";
+		CLEAR_ALARM=$(${DEFAULT_MYSQL}"SELECT alarm_clear FROM alarm;");
+	fi
+
+#Read status of each GPIO
+STATUS7=$(${DEFAULT_MYSQL}"SELECT pinstatus FROM pinstatus WHERE pin_num='7'";)
+STATUS8=$(${DEFAULT_MYSQL}"SELECT pinstatus FROM pinstatus WHERE pin_num='8'";)
+STATUS18=$(${DEFAULT_MYSQL}"SELECT pinstatus FROM pinstatus WHERE pin_num='18'";)
+STATUS23=$(${DEFAULT_MYSQL}"SELECT pinstatus FROM pinstatus WHERE pin_num='23'";)
+STATUS24=$(${DEFAULT_MYSQL}"SELECT pinstatus FROM pinstatus WHERE pin_num='24'";)
+STATUS25=$(${DEFAULT_MYSQL}"SELECT pinstatus FROM pinstatus WHERE pin_num='25'";)
+
+# refresh GPIO according to status
+
+QUARTO_AUTO=$(${DEFAULT_MYSQL}"SELECT ilumi_auto FROM ilumi WHERE ilumi_id =1;";)
+
+#GPIO 18 
+#Iluminacao - Quarto - Manual
+if [ ${QUARTO_AUTO} == "0" ]
+then
+		if [ ${STATUS18} == "1" ]
+		then
+			${SCRIPTS_DIR}GPIOSET 18;
+		else
+			${SCRIPTS_DIR}GPIOCLR 18;
+		fi
+else
+#Iluminacao - Quarto - Automatico
+LIGA=0
+QUARTO_ON_H=$(${DEFAULT_MYSQL}"SELECT ilumi_on_h FROM ilumi WHERE ilumi_id =1;");
+QUARTO_ON_M=$(${DEFAULT_MYSQL}"SELECT ilumi_on_m FROM ilumi WHERE ilumi_id =1;");
+QUARTO_OFF_H=$(${DEFAULT_MYSQL}"SELECT ilumi_off_h FROM ilumi WHERE ilumi_id =1;");
+QUARTO_OFF_M=$(${DEFAULT_MYSQL}"SELECT ilumi_off_m FROM ilumi WHERE ilumi_id =1;");
+
+
+if [ ${QUARTO_OFF_H} -gt ${QUARTO_ON_H} ]
+then
+	if [ ${TIME_H} -ge ${QUARTO_ON_H} ] && [ ${TIME_H} -lt ${QUARTO_OFF_H} ]
+	then
+		LIGA=1;
+		if [ ${TIME_H} -eq ${QUARTO_ON_H} ]
+			then
+				if [ ${TIME_M} -ge ${QUARTO_ON_M} ]
+				then
+					LIGA=1;
+				else
+					LIGA=0;
+				fi
+		fi
+	else
+		LIGA=0;
+	fi
+else
+	if [ ${QUARTO_OFF_H} -lt ${QUARTO_ON_H} ]
+	then
+		if [ ${TIME_H} -ge ${QUARTO_OFF_H} ] && [ ${TIME_H} -lt ${QUARTO_ON_H} ]
+		then
+			LIGA=0;
+			if [ ${TIME_H} -eq ${QUARTO_OFF_H} ]
+				then
+					if [ ${TIME_M} -ge ${QUARTO_OFF_M} ]
+					then
+						LIGA=0
+					else
+						LIGA=1
+					fi
+			fi	
+		else
+			LIGA=1
+		fi
+	fi
+fi
+
+if [ ${LIGA} == "1" ]
+then
+	${SCRIPTS_DIR}GPIOSET 18
+	${DEFAULT_MYSQL}"UPDATE pinstatus SET pinstatus = 1 WHERE pin_num = 18;";
+else
+	${SCRIPTS_DIR}GPIOCLR 18
+	${DEFAULT_MYSQL}"UPDATE pinstatus SET pinstatus = 0 WHERE pin_num = 18;";
+fi
+
+fi
+
+#GPIO 23
+#Iluminacao - Cozinha
+
+COZINHA_AUTO=$(${DEFAULT_MYSQL}"SELECT ilumi_auto FROM ilumi WHERE ilumi_id =2;");
+
+if [ ${COZINHA_AUTO} == "0" ]
+then
+if [ ${STATUS23} == "1" ]
+then
+	${SCRIPTS_DIR}GPIOSET 23
+else
+	${SCRIPTS_DIR}GPIOCLR 23
+fi
+else
+#Iluminacao - cozinha - Automatico]
+LIGA=0
+COZ_ON_H=$(${DEFAULT_MYSQL}"SELECT ilumi_on_h FROM ilumi WHERE ilumi_id =2;");
+COZ_ON_M=$(${DEFAULT_MYSQL}"SELECT ilumi_on_m FROM ilumi WHERE ilumi_id =2;");
+COZ_OFF_H=$(${DEFAULT_MYSQL}"SELECT ilumi_off_h FROM ilumi WHERE ilumi_id =2;");
+COZ_OFF_M=$(${DEFAULT_MYSQL}"SELECT ilumi_off_m FROM ilumi WHERE ilumi_id =2;");
+
+if [ ${COZ_OFF_H} -gt ${COZ_ON_H} ]
+then
+	if [ ${TIME_H} -ge ${COZ_ON_H} ] && [ ${TIME_H} -lt ${COZ_OFF_H} ]
+	then
+		LIGA=1
+		if [ ${TIME_H} -eq ${COZ_ON_H} ]
+			then
+				if [ ${TIME_M} -ge ${COZ_ON_M} ]
+				then
+					LIGA=1
+				else
+					LIGA=0
+				fi
+		fi
+	else
+		LIGA=0
+	fi
+else
+	if [ ${COZ_OFF_H} -lt ${COZ_ON_H} ]
+	then
+		if [ ${TIME_H} -ge ${COZ_OFF_H} ] && [ ${TIME_H} -lt ${COZ_ON_H} ]
+		then
+			LIGA=0
+			if [ ${TIME_H} -eq ${COZ_OFF_H} ]
+				then
+					if [ ${TIME_M} -ge ${COZ_OFF_M} ]
+					then
+						LIGA=0
+					else
+						LIGA=1
+					fi
+			fi	
+		else
+			LIGA=1
+		fi
+	fi
+fi
+if [ ${LIGA} == "1" ]
+then
+	${SCRIPTS_DIR}GPIOSET 23
+	${DEFAULT_MYSQL}"UPDATE pinstatus SET pinstatus = 1 WHERE pin_num = 23;";
+else
+	${SCRIPTS_DIR}GPIOCLR 23
+	${DEFAULT_MYSQL}"UPDATE pinstatus SET pinstatus = 0 WHERE pin_num = 23;";
+fi
+fi
+
+
+
+#GPIO 24
+#Iluminacao - Sala
+
+
+SALA_AUTO=$(${DEFAULT_MYSQL}"SELECT ilumi_auto FROM ilumi WHERE ilumi_id =3;");
+
+if [ ${SALA_AUTO} == "0" ]
+then
+if [ ${STATUS24} == "1" ]
+then
+	${SCRIPTS_DIR}GPIOSET 24
+else
+	${SCRIPTS_DIR}GPIOCLR 24
+fi
+else
+#Iluminacao - sala - Automatico
+LIGA=0
+SALA_ON_H=$(${DEFAULT_MYSQL}"SELECT ilumi_on_h FROM ilumi WHERE ilumi_id =3;");
+SALA_ON_M=$(${DEFAULT_MYSQL}"SELECT ilumi_on_m FROM ilumi WHERE ilumi_id =3;");
+SALA_OFF_H=$(${DEFAULT_MYSQL}"SELECT ilumi_off_h FROM ilumi WHERE ilumi_id =3;");
+SALA_OFF_M=$(${DEFAULT_MYSQL}"SELECT ilumi_off_m FROM ilumi WHERE ilumi_id =3;");
+
+if [ ${SALA_OFF_H} -gt ${SALA_ON_H} ]
+then
+	if [ ${TIME_H} -ge ${SALA_ON_H} ] && [ ${TIME_H} -lt ${SALA_OFF_H} ]
+	then
+		LIGA=1
+		if [ ${TIME_H} -eq ${SALA_ON_H} ]
+			then
+				if [ ${TIME_M} -ge ${SALA_ON_M} ]
+				then
+					LIGA=1
+				else
+					LIGA=0
+				fi
+		fi
+	else
+		LIGA=0
+	fi
+else
+	if [ ${SALA_OFF_H} -lt ${SALA_ON_H} ]
+	then
+		if [ ${TIME_H} -ge ${SALA_OFF_H} ] && [ ${TIME_H} -lt ${SALA_ON_H} ]
+		then
+			LIGA=0
+			if [ ${TIME_H} -eq ${SALA_OFF_H} ]
+				then
+					if [ ${TIME_M} -ge ${SALA_OFF_M} ]
+					then
+						LIGA=0
+					else
+						LIGA=1
+					fi
+			fi	
+		else
+			LIGA=1
+		fi
+	fi
+fi
+
+if [ ${LIGA} == "1" ]
+then
+	${SCRIPTS_DIR}GPIOSET 24
+	${DEFAULT_MYSQL}"UPDATE pinstatus SET pinstatus = 1 WHERE pin_num = 24;";
+else
+	${SCRIPTS_DIR}GPIOCLR 24
+	${DEFAULT_MYSQL}"UPDATE pinstatus SET pinstatus = 0 WHERE pin_num = 24;";
+fi
+fi
+
+
+
+#GPIO 25
+#Iluminacao - Rua
+RUA_AUTO=$(${DEFAULT_MYSQL}"SELECT ilumi_auto FROM ilumi WHERE ilumi_id =4;");
+LIGA=0
+if [ ${RUA_AUTO} == "0" ]
+then
+if [ ${STATUS25} == "1" ]
+then
+	${SCRIPTS_DIR}GPIOSET 25
+else
+	${SCRIPTS_DIR}GPIOCLR 25
+fi
+else
+#Iluminacao - cozinha - Automatico
+RUA_ON_H=$(${DEFAULT_MYSQL}"SELECT ilumi_on_h FROM ilumi WHERE ilumi_id =4;");
+RUA_ON_M=$(${DEFAULT_MYSQL}"SELECT ilumi_on_m FROM ilumi WHERE ilumi_id =4;");
+RUA_OFF_H=$(${DEFAULT_MYSQL}"SELECT ilumi_off_h FROM ilumi WHERE ilumi_id =4;");
+RUA_OFF_M=$(${DEFAULT_MYSQL}"SELECT ilumi_off_m FROM ilumi WHERE ilumi_id =4;");
+
+if [ ${RUA_OFF_H} -gt ${RUA_ON_H} ]
+then
+	if [ ${TIME_H} -ge ${RUA_ON_H} ] && [ ${TIME_H} -lt ${RUA_OFF_H} ]
+	then
+		LIGA=1
+		if [ ${TIME_H} -eq ${RUA_ON_H} ]
+			then
+				if [ ${TIME_M} -ge ${RUA_ON_M} ]
+				then
+					LIGA=1
+				else
+					LIGA=0
+				fi
+		fi
+	else
+		LIGA=0
+	fi
+else
+	if [ ${RUA_OFF_H} -lt ${RUA_ON_H} ]
+	then
+		if [ ${TIME_H} -ge ${RUA_OFF_H} ] && [ ${TIME_H} -lt ${RUA_ON_H} ]
+		then
+			LIGA=0
+			if [ ${TIME_H} -eq ${RUA_OFF_H} ]
+				then
+					if [ ${TIME_M} -ge ${RUA_OFF_M} ]
+					then
+						LIGA=0
+					else
+						LIGA=1
+					fi
+			fi	
+		else
+			LIGA=1
+		fi
+	fi
+fi
+
+if [ ${LIGA} == "1" ]
+then
+	${SCRIPTS_DIR}GPIOSET 25
+	${DEFAULT_MYSQL}"UPDATE pinstatus SET pinstatus = 1 WHERE pin_num = 25;";
+else
+	${SCRIPTS_DIR}GPIOCLR 25
+	${DEFAULT_MYSQL}"UPDATE pinstatus SET pinstatus = 0 WHERE pin_num = 25;";
+fi
+
+fi
+
+
+
+#GPIO 7
+#Portao Garagem
+if [ ${STATUS7} == "1" ]
+then
+	${SCRIPTS_DIR}GPIOSET 7
+else
+	${SCRIPTS_DIR}GPIOCLR 7
+fi
+
+TEMP_AUTO=$(${DEFAULT_MYSQL}"SELECT temp_autom FROM temperature";)
+
+	if [ ${TEMP_AUTO} == "1" ]
+	then	
+	TEMP_SET_MYSQL=$(${DEFAULT_MYSQL}"SELECT temp_set FROM temperature";)
+	
+		if [ ${TEMPERATURE} -gt ${TEMP_SET_MYSQL} ]
+		then
+			${SCRIPTS_DIR}GPIOSET 8
+			${DEFAULT_MYSQL}"UPDATE pinstatus SET pinstatus = 1 where pin_num = '8'";
+		else
+			${SCRIPTS_DIR}GPIOCLR 8
+			${DEFAULT_MYSQL}"UPDATE pinstatus SET pinstatus = 0 where pin_num = '8'";
+		fi
+	else
+#GPIO 8
+#Climatizador
+	if [ ${STATUS8} == "1" ]
+	then
+        	${SCRIPTS_DIR}GPIOSET 8
+	else
+        	${SCRIPTS_DIR}GPIOCLR 8
+	fi
+	fi
+	
+sleep ${waitTime}
+done

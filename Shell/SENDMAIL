@@ -1,0 +1,17 @@
+#!/bin/bash
+# send alert email
+if [ -f "/home/pi/mailaddress.txt"]
+then
+MAIL_ADDR=`cat /home/pi/mailaddress.txt`
+else
+MAIL_ADDR="default@gmail.com"
+fi
+
+SUBJECT="ALARME - HOMEPI"
+
+TIME=`date +%H:%M`
+DATE=`date +%F`
+echo "Alarme Ocorrido as " > /home/pi/mailtext
+echo "${TIME} ${DATE}" >> /home/pi/mailtext
+echo "Verifique a causa do alarme." >> /home/pi/mailtext
+mail -s ${SUBJECT} ${MAIL_ADDR} < /home/pi/mailtext

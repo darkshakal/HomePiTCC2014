@@ -1,0 +1,18 @@
+#!/bin/bash
+
+#script para modificacao do nivel das portas
+#ultima modificacao: 13-06-2014
+
+WORK_DIR="/sys/class/gpio/gpio"
+
+if [ "$#" -lt "1" ]; then
+echo "usage: GPIOCLR [gpio]"
+echo ""
+echo "[gpio]      - gpio number"
+echo ""
+echo "switch gpio_number to low level"
+else
+echo "0" > ${WORK_DIR}${1}/value
+
+fi
+

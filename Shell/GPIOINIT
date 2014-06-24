@@ -1,0 +1,34 @@
+#!/bin/bash
+
+#script para  inicializacao das portas entrada saida
+#inicializa tambem GPIOServer
+#ultima modificacao: 01-06-2014
+
+#cria alias para gpio atraves do comando export
+GPIOCON c 7
+GPIOCON c 8
+GPIOCON c 11
+GPIOCON c 17
+GPIOCON c 18
+GPIOCON c 22
+GPIOCON c 23
+GPIOCON c 24
+GPIOCON c 25
+
+#configura entradas e saidas
+GPIODIR 7 out
+GPIODIR 8 out 
+GPIODIR 11 out
+GPIODIR 17 in 
+GPIODIR 18 out 
+GPIODIR 22 in 
+GPIODIR 23 out 
+GPIODIR 24 out 
+GPIODIR 25 out 
+
+#carrega modulo para sensor de temperatura
+sudo modprobe w1-gpio
+sudo modprobe w1-therm
+
+#inicia laco principal
+GPIOSERVER&

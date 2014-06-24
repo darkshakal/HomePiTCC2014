@@ -1,0 +1,11 @@
+#!/bin/bash
+
+if [ -f "/home/pi/desligar" ]
+then
+	SHUTD=`cat /home/pi/desligar`
+	if [ ${SHUTD} == "desligar" ]
+	then 
+		rm -rf desligar
+		sudo shutdown -h now
+	fi
+fi

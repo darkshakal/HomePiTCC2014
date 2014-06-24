@@ -1,0 +1,46 @@
+#!/bin/bash
+# File: CONSUSERVER
+# Description: System consum monitoring
+# Last update: 14-06-2014
+# Author: Vagner Fritsch
+
+mysqlusername="root"
+mysqlpassword="mestre"
+
+CSCRIPTS_DIR="/usr/bin/"
+CDEFAULT_MYSQL="mysql -B --disable-column-names --user=$mysqlusername --password=$mysqlpassword gpio -e "
+
+#Start
+CTIME_MM=`date +%m`
+
+#Read status of each GPIO
+CSTATUS8=$(${CDEFAULT_MYSQL}"SELECT pinstatus FROM pinstatus WHERE pin_num='8'";)
+CSTATUS18=$(${CDEFAULT_MYSQL}"SELECT pinstatus FROM pinstatus WHERE pin_num='18'";)
+CSTATUS23=$(${CDEFAULT_MYSQL}"SELECT pinstatus FROM pinstatus WHERE pin_num='23'";)
+CSTATUS24=$(${CDEFAULT_MYSQL}"SELECT pinstatus FROM pinstatus WHERE pin_num='24'";)
+CSTATUS25=$(${CDEFAULT_MYSQL}"SELECT pinstatus FROM pinstatus WHERE pin_num='25'";)
+
+if [ ${CSTATUS8} == 1 ]
+then
+	${CDEFAULT_MYSQL}"UPDATE consum SET consum_total = consum_total + 1 WHERE consum_equip ='climatizador' and consum_month = '${CTIME_MM}'";
+fi
+
+if [ ${CSTATUS18} == 1 ]
+then
+	${CDEFAULT_MYSQL}"UPDATE consum SET consum_total = consum_total + 1 WHERE consum_equip ='quarto' and consum_month = '${CTIME_MM}'";
+fi
+
+if [ ${CSTATUS23} == 1 ]
+then
+	${CDEFAULT_MYSQL}"UPDATE consum SET consum_total = consum_total + 1 WHERE consum_equip ='cozinha' and consum_month = '${CTIME_MM}'";
+fi
+
+if [ ${CSTATUS24} == 1 ]
+then
+	${CDEFAULT_MYSQL}"UPDATE consum SET consum_total = consum_total + 1 WHERE consum_equip ='sala' and consum_month = '${CTIME_MM}'";
+fi
+
+if [ ${CSTATUS25} == 1 ]
+then
+	${CDEFAULT_MYSQL}"UPDATE consum SET consum_total = consum_total + 1 WHERE consum_equip='rua' and consum_month = '${CTIME_MM}'";
+fi
