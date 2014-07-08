@@ -31,8 +31,10 @@ if(isset($_POST['alarmoff']))
 
 if(isset($_POST['alarmclear']))
 {
-	mysql_query("UPDATE alarm set alarm_clear = 1");
-        mysql_query("UPDATE alarm set alarm_flag = 0");
+	mysql_query("UPDATE alarm set alarm_clear = 1;");
+    mysql_query("UPDATE alarm set alarm_flag = 0;");
+	mysql_query("UPDATE pinstatus SET pinstatus = 0 WHERE pin_num='11';");
+	mysql_query("UPDATE alarm set alarm_set = 0;");
         
 }
 

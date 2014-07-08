@@ -36,11 +36,13 @@ require_once "autentica.php";
         <div class="col-md-1 col-xs-6 column">
 		 <a href="advanced.php">
 			<img class="img-thumbnail"   src="img/main/settings128.png" /></a>
+                         <br><div class="text" style="font-size:11;color:#000"><center><b>Configuracoes<center></b></div>
 		</div>
                 
 	<div class="col-md-1 col-xs-6 column">
 		<a href="garage.php">
 			<img class="img-thumbnail"   src="img/main/garage128.png" /></a>
+                        <br><div class="text" style="font-size:11;color:#000"><center><b>Garagem<center></b></div>
 		</div>
 	</div>
         <br>
@@ -48,10 +50,12 @@ require_once "autentica.php";
 		<div class="col-md-1 col-xs-6 column">
 		<a href="alarm.php">
 			<img class="img-thumbnail"   src="img/main/alarm128.png" /></a>
+                        <br><div class="text" style="font-size:11;color:#000"><center><b>Alarme<center></b></div>
 		</div>
 		<div class="col-md-1 col-xs-6 column">
 		<a href="fan.php">
 			<img class="img-thumbnail"   src="img/main/fan128.png" /></a>
+                        <br><div class="text" style="font-size:11;color:#000"><center><b>Climatizador<center></b></div>
 		</div>
 	</div>
         <br>
@@ -59,10 +63,12 @@ require_once "autentica.php";
 		<div class="col-md-1 col-xs-6 column">
 		<a href="lights.php">
 			<img class="img-thumbnail"   src="img/main/light128.png" /></a>
+                        <br><div class="text" style="font-size:11;color:#000"><center><b>Iluminacao<center></b></div>
 		</div>
 		<div class="col-md-1 col-xs-6 column">
 		<a href="energy.php">
 			<img class="img-thumbnail"   src="img/main/energy128.png" /></a>
+                        <br><div class="text" style="font-size:11;color:#000"><center><b>Consumo<center></b></div>
 		</div>
 	</div>
         <br>
@@ -70,10 +76,12 @@ require_once "autentica.php";
 		<div class="col-md-1 col-xs-6 column">
 		<a href="temperature.php">
 			<img class="img-thumbnail"   src="img/main/temperature128.png" /></a>
+                        <br><div class="text" style="font-size:11;color:#000"><center><b>Temperatura<center></b></div>
 		</div>
 		<div class="col-md-1 col-xs-6 column">
 		<a href="mail.php">
 			<img class="img-thumbnail"   src="img/main/mail128.png" /></a>
+                        <br><div class="text" style="font-size:11;color:#000"><center><b>E-mail<center></b></div>
 		</div>
 	</div>
         <br>
@@ -81,10 +89,12 @@ require_once "autentica.php";
 		<div class="col-md-1 col-xs-6 column">
 		<a href="logs.php">
 			<img class="img-thumbnail"   src="img/main/log128.png" /></a>
+                        <br><div class="text" style="font-size:11;color:#000"><center><b>Logs<center></b></div>
 		</div>
 		<div class="col-md-1 col-xs-6 column">
 		<a href="logoff.php">
 			<img class="img-thumbnail"   src="img/main/logoff128.png" /></a>
+                        <br><div class="text" style="font-size:11;color:#000"><center><b>Sair<center></b></div>
 		</div>
 	</div>
 	

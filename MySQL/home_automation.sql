@@ -229,32 +229,35 @@ CREATE TABLE IF NOT EXISTS `event_id` (
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;
 
 insert into event_id (descricao) values 
-('Luz quarto : ligada'),
-('Luz quarto : desligada'),
-('Luz cozinha : ligada'),
-('Luz cozinha : desligada'),
-('Luz sala : ligada'),
-('Luz sala : desligada'),
-('Luz rua : ligada'),
-('Luz rua : desligada'),
-('Portao da garagem : aberto'),
-('Portao da garagem : fechado'),
-('Climatizador : ligado'),
-('Climatizador : desligado'),
-('Luz quarto : Automatico'),
-('Luz quarto : Manual'),
-('Luz cozinha : Automatico'),
-('Luz cozinha : Manual'),
-('Luz sala : Automatico'),
-('Luz sala : Manual'),
-('Luz rua : Automatico'),
-('Luz rua : Manual'),
-('Climatizador : Automatico'),
-('Climatizador : Manual'),
-('Alarme : Habilitado'),
-('Alarme : Desabilitado'),
-('Alarme : Acionado'),
-('Nova Temperatura Autom.');
+('Luz quarto : ligada'), -- 1
+('Luz quarto : desligada'), -- 2
+('Luz cozinha : ligada'), -- 3
+('Luz cozinha : desligada'), -- 4
+('Luz sala : ligada'), -- 5
+('Luz sala : desligada'), -- 6
+('Luz rua : ligada'), -- 7
+('Luz rua : desligada'), -- 8
+('Portao da garagem : aberto'), -- 9
+('Portao da garagem : fechado'), -- 10
+('Climatizador : ligado'), -- 11
+('Climatizador : desligado'), -- 12
+('Luz quarto : Automatico'), -- 13
+('Luz quarto : Manual'), -- 14
+('Luz cozinha : Automatico'), -- 15
+('Luz cozinha : Manual'), -- 16
+('Luz sala : Automatico'), -- 17
+('Luz sala : Manual'), -- 18
+('Luz rua : Automatico'), -- 19
+('Luz rua : Manual'), -- 20
+('Climatizador : Automatico'), -- 21
+('Climatizador : Manual'), -- 22
+('Alarme : Habilitado'), -- 23
+('Alarme : Desabilitado'), -- 24 
+('Alarme : Acionado'), -- 25
+('Nova Temperatura Autom.'); -- 26
+
+
+
 
 --
 -- Estrutura da tabela usuarios

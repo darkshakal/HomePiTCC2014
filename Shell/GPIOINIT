@@ -30,5 +30,7 @@ GPIODIR 25 out
 sudo modprobe w1-gpio
 sudo modprobe w1-therm
 
+READTEMP
+
 #inicia laco principal
 GPIOSERVER&

@@ -29,7 +29,9 @@ TIME_M=`date +%M`
 
 	#Read if Alarm is activated
 	SET_ALARM=$(${DEFAULT_MYSQL}"SELECT alarm_set FROM alarm;");
-
+	
+	ALARM_FLAG=$(${DEFAULT_MYSQL}"SELECT alarm_flag FROM alarm;");
+	
 	# if alarm is activated, test the switch
 	if [ ${SET_ALARM} == "1" ]
 	then
@@ -37,12 +39,12 @@ TIME_M=`date +%M`
 		if [ ${CLEAR_ALARM} == "0" ]
 			then
 			DIP_SWITCH=`${SCRIPTS_DIR}GPIOPIN 22`
-				if [ ${DIP_SWITCH} == "0" ]
+				if [ ${DIP_SWITCH} == "1" ]
 				then
 					${SCRIPTS_DIR}GPIOSET 11
 					${DEFAULT_MYSQL}"UPDATE alarm SET alarm_flag = 1;";
 					${DEFAULT_MYSQL}"UPDATE pinstatus SET pinstatus = 1 WHERE pin_num='11';";
-					${DEFAULT_MYSQL}"INSERT INTO logs (log_event_id,log_data,log_hora) VALUES  (23,${TIME_DATA},${TIME_HORA});";
+					${DEFAULT_MYSQL}"INSERT INTO logs (log_event_id,log_data,log_hora) VALUES  (25,${TIME_DATA},${TIME_HORA});";
 					${SCRIPTS_DIR}SENDMAIL
 				#else
 					#${SCRIPTS_DIR}GPIOCLR 11
@@ -56,6 +58,8 @@ TIME_M=`date +%M`
 	else
 		${DEFAULT_MYSQL}"UPDATE alarm SET alarm_clear = 0;";
 		CLEAR_ALARM=$(${DEFAULT_MYSQL}"SELECT alarm_clear FROM alarm;");
+		${SCRIPTS_DIR}GPIOCLR 11
+		${DEFAULT_MYSQL}"UPDATE pinstatus SET pinstatus = 0 WHERE pin_num='11';";
 	fi
 
 #Read status of each GPIO
